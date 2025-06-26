@@ -1,0 +1,102 @@
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando datos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-3xl font-extrabold text-gray-900">{{ isEditMode ? 'Editar Salario' : 'Crear Nuevo Salario' }}</h1>
+      <button [routerLink]="['/salaries']"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Cancelar
+      </button>
+    </div>
+
+    <form [formGroup]="salaryForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="workerId" class="block text-sm font-medium text-gray-700">Trabajador</label>
+        <select id="workerId" formControlName="workerId"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('workerId', 'required')}">
+          <option value="">Selecciona un trabajador</option>
+          <option *ngFor="let worker of workers" [value]="worker.id">{{ worker.firstName }} {{ worker.lastName }} ({{ worker.dni }})</option>
+        </select>
+        <div *ngIf="hasError('workerId', 'required')" class="text-red-500 text-xs mt-1">El trabajador es requerido.</div>
+      </div>
+
+      <div>
+        <label for="chargeId" class="block text-sm font-medium text-gray-700">Cargo</label>
+        <select id="chargeId" formControlName="chargeId"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('chargeId', 'required')}">
+          <option value="">Selecciona un cargo</option>
+          <option *ngFor="let charge of charges" [value]="charge.id">{{ charge.name }}</option>
+        </select>
+        <div *ngIf="hasError('chargeId', 'required')" class="text-red-500 text-xs mt-1">El cargo es requerido.</div>
+      </div>
+
+      <div>
+        <label for="baseSalary" class="block text-sm font-medium text-gray-700">Salario Base</label>
+        <input type="number" id="baseSalary" formControlName="baseSalary"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('baseSalary', 'required') || hasError('baseSalary', 'min')}">
+        <div *ngIf="hasError('baseSalary', 'required')" class="text-red-500 text-xs mt-1">El salario base es requerido.</div>
+        <div *ngIf="hasError('baseSalary', 'min')" class="text-red-500 text-xs mt-1">El salario base no puede ser negativo.</div>
+      </div>
+
+      <div>
+        <label for="bonus" class="block text-sm font-medium text-gray-700">Bonificación</label>
+        <input type="number" id="bonus" formControlName="bonus"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('bonus', 'required') || hasError('bonus', 'min')}">
+        <div *ngIf="hasError('bonus', 'required')" class="text-red-500 text-xs mt-1">La bonificación es requerida.</div>
+        <div *ngIf="hasError('bonus', 'min')" class="text-red-500 text-xs mt-1">La bonificación no puede ser negativa.</div>
+      </div>
+
+      <div>
+        <label for="deductions" class="block text-sm font-medium text-gray-700">Deducciones</label>
+        <input type="number" id="deductions" formControlName="deductions"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('deductions', 'required') || hasError('deductions', 'min')}">
+        <div *ngIf="hasError('deductions', 'required')" class="text-red-500 text-xs mt-1">Las deducciones son requeridas.</div>
+        <div *ngIf="hasError('deductions', 'min')" class="text-red-500 text-xs mt-1">Las deducciones no pueden ser negativas.</div>
+      </div>
+
+      <div>
+        <label for="netSalary" class="block text-sm font-medium text-gray-700">Salario Neto</label>
+        <input type="number" id="netSalary" formControlName="netSalary"
+               class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 cursor-not-allowed">
+      </div>
+
+      <div>
+        <label for="effectiveDate" class="block text-sm font-medium text-gray-700">Fecha Efectiva</label>
+        <input type="date" id="effectiveDate" formControlName="effectiveDate"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('effectiveDate', 'required')}">
+        <div *ngIf="hasError('effectiveDate', 'required')" class="text-red-500 text-xs mt-1">La fecha efectiva es requerida.</div>
+      </div>
+
+      <div *ngIf="isEditMode" class="md:col-span-2">
+        <label for="active" class="flex items-center text-sm font-medium text-gray-700 cursor-pointer">
+          <input type="checkbox" id="active" formControlName="active" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="ml-2">Activo</span>
+        </label>
+      </div>
+
+      <div class="md:col-span-2 flex justify-end mt-6">
+        <button type="submit"
+                [disabled]="salaryForm.invalid"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded-md shadow-lg transition duration-300 ease-in-out flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          {{ isEditMode ? 'Guardar Cambios' : 'Crear Salario' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

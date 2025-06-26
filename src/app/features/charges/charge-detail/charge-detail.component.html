@@ -1,0 +1,77 @@
+<!-- src/app/features/charges/charge-detail/charge-detail.component.html -->
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando detalles del cargo...</p>
+  </div>
+
+  <div *ngIf="!isLoading && charge">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-3xl font-extrabold text-gray-900">Detalles del Cargo</h1>
+      <div class="flex space-x-3">
+        <button [routerLink]="['/charges/edit', charge.id]"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.38-2.828-2.829z" />
+          </svg>
+          Editar
+        </button>
+        <button [routerLink]="['/charges']"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Volver a la lista
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+      <div class="p-4 bg-gray-50 rounded-md shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Información del Cargo</h2>
+        <p><strong>Nombre:</strong> {{ charge.name }}</p>
+        <p><strong>Descripción:</strong> {{ charge.description || 'N/A' }}</p>
+        <p><strong>Tarifa por Hora:</strong> ${{ charge.hourlyRate | number:'1.2-2' }}</p>
+        <!-- FIXED: Added baseSalaryMin and baseSalaryMax -->
+        <p><strong>Salario Base Mínimo:</strong> {{ charge.baseSalaryMin | currency:'USD':'symbol':'1.2-2' }}</p>
+        <p><strong>Salario Base Máximo:</strong> {{ charge.baseSalaryMax | currency:'USD':'symbol':'1.2-2' }}</p>
+        <p><strong>Estado:</strong>
+          <span [ngClass]="{
+            'text-green-600 font-semibold': charge.active,
+            'text-red-600 font-semibold': !charge.active
+          }">
+            {{ charge.active ? 'Activo' : 'Inactivo' }}
+          </span>
+        </p>
+      </div>
+
+      <div class="p-4 bg-gray-50 rounded-md shadow-sm md:col-span-1">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Beneficios</h2>
+        <ul *ngIf="charge.benefits && charge.benefits.length > 0" class="list-disc list-inside">
+          <li *ngFor="let benefit of charge.benefits">{{ benefit }}</li>
+        </ul>
+        <p *ngIf="!charge.benefits || charge.benefits.length === 0">No hay beneficios definidos.</p>
+      </div>
+
+      <div class="p-4 bg-gray-50 rounded-md shadow-sm md:col-span-1">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Responsabilidades</h2>
+        <ul *ngIf="charge.responsibilities && charge.responsibilities.length > 0" class="list-disc list-inside">
+          <li *ngFor="let resp of charge.responsibilities">{{ resp }}</li>
+        </ul>
+        <p *ngIf="!charge.responsibilities || charge.responsibilities.length === 0">No hay responsabilidades definidas.</p>
+      </div>
+
+      <div class="p-4 bg-gray-50 rounded-md shadow-sm md:col-span-2">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Habilidades Requeridas</h2>
+        <ul *ngIf="charge.requiredSkills && charge.requiredSkills.length > 0" class="list-disc list-inside">
+          <li *ngFor="let skill of charge.requiredSkills">{{ skill }}</li>
+        </ul>
+        <p *ngIf="!charge.requiredSkills || charge.requiredSkills.length === 0">No hay habilidades requeridas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !charge" class="text-center p-8 text-red-600">
+    <p class="text-xl">Cargo no encontrado.</p>
+  </div>
+</div>

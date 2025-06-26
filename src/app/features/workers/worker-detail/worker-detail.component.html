@@ -1,0 +1,71 @@
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando detalles del trabajador...</p>
+  </div>
+
+  <div *ngIf="!isLoading && worker" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="md:col-span-2 flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-4xl font-extrabold text-gray-900">Detalles del Trabajador</h1>
+      <div class="flex space-x-3">
+        <button [routerLink]="['/workers', worker.id, 'edit']"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+          </svg>
+          Editar
+        </button>
+        <button [routerLink]="['/workers']"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Volver a la Lista
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Información Personal</h2>
+      <div class="space-y-3 text-gray-700">
+        <p><strong class="font-semibold text-gray-900">Nombre Completo:</strong> {{ worker.firstName }} {{ worker.lastName }}</p>
+        <p><strong class="font-semibold text-gray-900">DNI:</strong> {{ worker.dni }}</p>
+        <p><strong class="font-semibold text-gray-900">Fecha de Nacimiento:</strong> {{ worker.birthDate | date:'longDate' }}</p>
+        <p><strong class="font-semibold text-gray-900">Dirección:</strong> {{ worker.address }}</p>
+        <p><strong class="font-semibold text-gray-900">Teléfono:</strong> {{ worker.phone }}</p>
+        <p><strong class="font-semibold text-gray-900">Email:</strong> {{ worker.email }}</p>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Información de Empleo</h2>
+      <div class="space-y-3 text-gray-700">
+        <p><strong class="font-semibold text-gray-900">Cargo:</strong> {{ worker.position }}</p>
+        <p><strong class="font-semibold text-gray-900">Fecha de Contratación:</strong> {{ worker.hireDate | date:'longDate' }}</p>
+        <p><strong class="font-semibold text-gray-900">Estado:</strong>
+          <span [ngClass]="{
+            'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true,
+            'bg-green-100 text-green-800': worker.active,
+            'bg-red-100 text-red-800': !worker.active
+          }">
+            {{ worker.active ? 'Activo' : 'Inactivo' }}
+          </span>
+        </p>
+        <p><strong class="font-semibold text-gray-900">Estado del Empleo:</strong> {{ worker.status }}</p>
+      </div>
+    </div>
+
+    <div class="md:col-span-2">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Información de Auditoría</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
+        <p><strong class="font-semibold text-gray-900">Creado en:</strong> {{ worker.createdAt | date:'short' }}</p>
+        <p><strong class="font-semibold text-gray-900">Última Actualización:</strong> {{ worker.updatedAt | date:'short' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !worker" class="text-center p-8 text-red-600">
+    <p class="text-xl">Trabajador no encontrado.</p>
+  </div>
+</div>

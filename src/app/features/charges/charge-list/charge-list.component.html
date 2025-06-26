@@ -1,0 +1,88 @@
+<!-- src/app/features/charges/charge-list/charge-list.component.html -->
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div class="flex justify-between items-center mb-6 border-b pb-4">
+    <h1 class="text-3xl font-extrabold text-gray-900">Lista de Cargos</h1>
+    <button [routerLink]="['/charges/new']"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Nuevo Cargo
+    </button>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="mb-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+    <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Buscar cargos..."
+           class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+    <div class="flex space-x-2">
+      <button (click)="filterStatus = 'active'"
+              [ngClass]="{'bg-blue-600 text-white': filterStatus === 'active', 'bg-gray-200 text-gray-700': filterStatus !== 'active'}"
+              class="py-2 px-4 rounded-md font-semibold transition duration-300 ease-in-out">Activos</button>
+      <button (click)="filterStatus = 'inactive'"
+              [ngClass]="{'bg-blue-600 text-white': filterStatus === 'inactive', 'bg-gray-200 text-gray-700': filterStatus !== 'inactive'}"
+              class="py-2 px-4 rounded-md font-semibold transition duration-300 ease-in-out">Inactivos</button>
+      <button (click)="filterStatus = 'all'"
+              [ngClass]="{'bg-blue-600 text-white': filterStatus === 'all', 'bg-gray-200 text-gray-700': filterStatus !== 'all'}"
+              class="py-2 px-4 rounded-md font-semibold transition duration-300 ease-in-out">Todos</button>
+    </div>
+  </div>
+
+  <!-- Charge List Table -->
+  <div class="overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3">Nombre</th>
+          <th scope="col" class="px-6 py-3">Tarifa por Hora</th>
+          <!-- FIXED: Table headers for baseSalaryMin and baseSalaryMax -->
+          <th scope="col" class="px-6 py-3">Salario Base Min</th>
+          <th scope="col" class="px-6 py-3">Salario Base Max</th>
+          <th scope="col" class="px-6 py-3">Estado</th>
+          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="(filteredCharges$ | async) as charges; else loadingOrNoData">
+          <tr *ngFor="let charge of charges" class="bg-white border-b hover:bg-gray-50">
+            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ charge.name }}</td>
+            <td class="px-6 py-4 text-gray-500">${{ charge.hourlyRate | number:'1.2-2' }}</td>
+            <!-- FIXED: Display baseSalaryMin and baseSalaryMax -->
+            <td class="px-6 py-4 text-gray-500">{{ charge.baseSalaryMin | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="px-6 py-4 text-gray-500">{{ charge.baseSalaryMax | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="px-6 py-4">
+              <span [ngClass]="{
+                  'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true,
+                  'bg-green-100 text-green-800': charge.active,
+                  'bg-red-100 text-red-800': !charge.active
+                }">
+                {{ charge.active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a [routerLink]="['/charges', charge.id]" class="font-medium text-blue-600 hover:underline mr-3">Ver</a>
+              <a [routerLink]="['/charges/edit', charge.id]" class="font-medium text-indigo-600 hover:underline mr-3">Editar</a>
+              <ng-container *ngIf="charge.active; else restoreButton">
+                <button (click)="softDeleteCharge(charge.id!, charge.name)" class="font-medium text-red-600 hover:underline">Inactivar</button>
+              </ng-container>
+              <ng-template #restoreButton>
+                <button (click)="restoreCharge(charge.id!, charge.name)" class="font-medium text-green-600 hover:underline">Activar</button>
+              </ng-template>
+            </td>
+          </tr>
+          <tr *ngIf="charges.length === 0">
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No se encontraron cargos.</td>
+          </tr>
+        </ng-container>
+        <ng-template #loadingOrNoData>
+          <tr *ngIf="isLoading" class="bg-white border-b">
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando cargos...</td>
+          </tr>
+          <tr *ngIf="!isLoading && !(filteredCharges$ | async)?.length">
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay cargos disponibles.</td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </table>
+  </div>
+</div>

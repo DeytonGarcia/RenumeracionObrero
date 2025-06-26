@@ -1,0 +1,104 @@
+<!-- src/app/features/payments/payment-form/payment-form.component.html -->
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando datos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-3xl font-extrabold text-gray-900">{{ isEditMode ? 'Editar Pago' : 'Crear Nuevo Pago' }}</h1>
+      <button [routerLink]="['/payments']"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Cancelar
+      </button>
+    </div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Worker Select -->
+      <div>
+        <label for="workerId" class="block text-sm font-medium text-gray-700">Trabajador</label>
+        <select id="workerId" formControlName="workerId"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('workerId', 'required')}">
+          <option value="">Selecciona un trabajador</option>
+          <option *ngFor="let worker of workers" [value]="worker.id">{{ worker.firstName }} {{ worker.lastName }} ({{ worker.dni }})</option>
+        </select>
+        <div *ngIf="hasError('workerId', 'required')" class="text-red-500 text-xs mt-1">El trabajador es requerido.</div>
+      </div>
+
+      <!-- Payment Type -->
+      <div>
+        <label for="paymentType" class="block text-sm font-medium text-gray-700">Tipo de Pago</label>
+        <select id="paymentType" formControlName="paymentType"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('paymentType', 'required')}">
+          <option value="">Selecciona un tipo</option>
+          <option *ngFor="let type of paymentTypes" [value]="type">{{ type }}</option>
+        </select>
+        <div *ngIf="hasError('paymentType', 'required')" class="text-red-500 text-xs mt-1">El tipo de pago es requerido.</div>
+      </div>
+
+      <!-- Amount -->
+      <div>
+        <label for="amount" class="block text-sm font-medium text-gray-700">Monto</label>
+        <input type="number" id="amount" formControlName="amount"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('amount', 'required') || hasError('amount', 'min')}">
+        <div *ngIf="hasError('amount', 'required')" class="text-red-500 text-xs mt-1">El monto es requerido.</div>
+        <div *ngIf="hasError('amount', 'min')" class="text-red-500 text-xs mt-1">El monto no puede ser negativo.</div>
+      </div>
+
+      <!-- Payment Date -->
+      <div>
+        <label for="paymentDate" class="block text-sm font-medium text-gray-700">Fecha de Pago</label>
+        <input type="date" id="paymentDate" formControlName="paymentDate"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('paymentDate', 'required')}">
+        <div *ngIf="hasError('paymentDate', 'required')" class="text-red-500 text-xs mt-1">La fecha de pago es requerida.</div>
+      </div>
+
+      <!-- Description -->
+      <div class="md:col-span-2">
+        <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+        <textarea id="description" formControlName="description" rows="3"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+      </div>
+
+      <!-- Payment Status (newly added) -->
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700">Estado del Pago</label>
+        <select id="status" formControlName="status"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('status', 'required')}">
+          <option value="">Selecciona un estado</option>
+          <option *ngFor="let status of paymentStatuses" [value]="status">{{ status }}</option>
+        </select>
+        <div *ngIf="hasError('status', 'required')" class="text-red-500 text-xs mt-1">El estado del pago es requerido.</div>
+      </div>
+
+      <!-- Active (for edit mode) -->
+      <div *ngIf="isEditMode" class="md:col-span-2">
+        <label for="active" class="flex items-center text-sm font-medium text-gray-700 cursor-pointer">
+          <input type="checkbox" id="active" formControlName="active" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="ml-2">Activo</span>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="md:col-span-2 flex justify-end mt-6">
+        <button type="submit"
+                [disabled]="paymentForm.invalid"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded-md shadow-lg transition duration-300 ease-in-out flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          {{ isEditMode ? 'Guardar Cambios' : 'Crear Pago' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

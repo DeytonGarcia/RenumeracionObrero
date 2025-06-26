@@ -1,0 +1,138 @@
+<!-- src/app/features/charges/charge-form/charge-form.component.html -->
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando datos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-3xl font-extrabold text-gray-900">{{ isEditMode ? 'Editar Cargo' : 'Crear Nuevo Cargo' }}</h1>
+      <button [routerLink]="['/charges']"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Cancelar
+      </button>
+    </div>
+
+    <form [formGroup]="chargeForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Name -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Nombre del Cargo</label>
+        <input type="text" id="name" formControlName="name"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('name', 'required')}">
+        <div *ngIf="hasError('name', 'required')" class="text-red-500 text-xs mt-1">El nombre es requerido.</div>
+      </div>
+
+      <!-- Hourly Rate -->
+      <div>
+        <label for="hourlyRate" class="block text-sm font-medium text-gray-700">Tarifa por Hora</label>
+        <input type="number" id="hourlyRate" formControlName="hourlyRate"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('hourlyRate', 'required') || hasError('hourlyRate', 'min')}">
+        <div *ngIf="hasError('hourlyRate', 'required')" class="text-red-500 text-xs mt-1">La tarifa por hora es requerida.</div>
+        <div *ngIf="hasError('hourlyRate', 'min')" class="text-red-500 text-xs mt-1">La tarifa no puede ser negativa.</div>
+      </div>
+
+      <!-- FIXED: Base Salary Min -->
+      <div>
+        <label for="baseSalaryMin" class="block text-sm font-medium text-gray-700">Salario Base Mínimo</label>
+        <input type="number" id="baseSalaryMin" formControlName="baseSalaryMin"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('baseSalaryMin', 'min')}">
+        <div *ngIf="hasError('baseSalaryMin', 'min')" class="text-red-500 text-xs mt-1">El salario mínimo no puede ser negativo.</div>
+      </div>
+
+      <!-- FIXED: Base Salary Max -->
+      <div>
+        <label for="baseSalaryMax" class="block text-sm font-medium text-gray-700">Salario Base Máximo</label>
+        <input type="number" id="baseSalaryMax" formControlName="baseSalaryMax"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('baseSalaryMax', 'min')}">
+        <div *ngIf="hasError('baseSalaryMax', 'min')" class="text-red-500 text-xs mt-1">El salario máximo no puede ser negativo.</div>
+      </div>
+
+      <!-- Description -->
+      <div class="md:col-span-2">
+        <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+        <textarea id="description" formControlName="description" rows="3"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+      </div>
+
+      <!-- Responsibilities (FormArray) -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Responsabilidades</label>
+        <div formArrayName="responsibilities">
+          <div *ngFor="let control of responsibilities.controls; let i = index" class="flex items-center mb-2">
+            <input type="text" [formControlName]="i"
+                   class="flex-grow border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mr-2"
+                   [ngClass]="{'border-red-500': hasArrayControlError(responsibilities, i, 'required')}">
+            <button type="button" (click)="removeResponsibility(i)" class="text-red-600 hover:text-red-800 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" (click)="addResponsibility()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out">
+          Añadir Responsabilidad
+        </button>
+      </div>
+
+      <!-- Required Skills (FormArray) -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades Requeridas</label>
+        <div formArrayName="requiredSkills">
+          <div *ngFor="let control of requiredSkills.controls; let i = index" class="flex items-center mb-2">
+            <input type="text" [formControlName]="i"
+                   class="flex-grow border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mr-2"
+                   [ngClass]="{'border-red-500': hasArrayControlError(requiredSkills, i, 'required')}">
+            <button type="button" (click)="removeRequiredSkill(i)" class="text-red-600 hover:text-red-800 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" (click)="addRequiredSkill()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out">
+          Añadir Habilidad
+        </button>
+      </div>
+
+      <!-- Benefits (FormArray) -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Beneficios</label>
+        <div formArrayName="benefits">
+          <div *ngFor="let control of benefits.controls; let i = index" class="flex items-center mb-2">
+            <input type="text" [formControlName]="i"
+                   class="flex-grow border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mr-2"
+                   [ngClass]="{'border-red-500': hasArrayControlError(benefits, i, 'required')}">
+            <button type="button" (click)="removeBenefit(i)" class="text-red-600 hover:text-red-800 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" (click)="addBenefit()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out">
+          Añadir Beneficio
+        </button>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="md:col-span-2 flex justify-end mt-6">
+        <button type="submit"
+                [disabled]="chargeForm.invalid"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded-md shadow-lg transition duration-300 ease-in-out flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          {{ isEditMode ? 'Guardar Cambios' : 'Crear Cargo' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

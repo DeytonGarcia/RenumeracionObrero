@@ -1,0 +1,129 @@
+<div class="container mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <div *ngIf="isLoading && isEditMode" class="text-center p-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <p class="mt-4 text-lg text-gray-600">Cargando datos del trabajador...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-3xl font-extrabold text-gray-900">{{ isEditMode ? 'Editar Trabajador' : 'Crear Nuevo Trabajador' }}</h1>
+      <button [routerLink]="['/workers']"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Cancelar
+      </button>
+    </div>
+
+    <form [formGroup]="workerForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="firstName" class="block text-sm font-medium text-gray-700">Nombres</label>
+        <input type="text" id="firstName" formControlName="firstName"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('firstName', 'required') || hasError('firstName', 'minlength')}">
+        <div *ngIf="hasError('firstName', 'required')" class="text-red-500 text-xs mt-1">El nombre es requerido.</div>
+        <div *ngIf="hasError('firstName', 'minlength')" class="text-red-500 text-xs mt-1">El nombre debe tener al menos 2 caracteres.</div>
+      </div>
+
+      <div>
+        <label for="lastName" class="block text-sm font-medium text-gray-700">Apellidos</label>
+        <input type="text" id="lastName" formControlName="lastName"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('lastName', 'required') || hasError('lastName', 'minlength')}">
+        <div *ngIf="hasError('lastName', 'required')" class="text-red-500 text-xs mt-1">El apellido es requerido.</div>
+        <div *ngIf="hasError('lastName', 'minlength')" class="text-red-500 text-xs mt-1">El apellido debe tener al menos 2 caracteres.</div>
+      </div>
+
+      <div>
+        <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
+        <input type="text" id="dni" formControlName="dni"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('dni', 'required') || hasError('dni', 'pattern')}">
+        <div *ngIf="hasError('dni', 'required')" class="text-red-500 text-xs mt-1">El DNI es requerido.</div>
+        <div *ngIf="hasError('dni', 'pattern')" class="text-red-500 text-xs mt-1">El DNI debe tener 8 a 10 dígitos.</div>
+      </div>
+
+      <div>
+        <label for="address" class="block text-sm font-medium text-gray-700">Dirección</label>
+        <input type="text" id="address" formControlName="address"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('address', 'required')}">
+        <div *ngIf="hasError('address', 'required')" class="text-red-500 text-xs mt-1">La dirección es requerida.</div>
+      </div>
+
+      <div>
+        <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+        <input type="text" id="phone" formControlName="phone"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('phone', 'required') || hasError('phone', 'pattern')}">
+        <div *ngIf="hasError('phone', 'required')" class="text-red-500 text-xs mt-1">El teléfono es requerido.</div>
+        <div *ngIf="hasError('phone', 'pattern')" class="text-red-500 text-xs mt-1">El teléfono debe tener 9 dígitos.</div>
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" formControlName="email"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('email', 'required') || hasError('email', 'email')}">
+        <div *ngIf="hasError('email', 'required')" class="text-red-500 text-xs mt-1">El email es requerido.</div>
+        <div *ngIf="hasError('email', 'email')" class="text-red-500 text-xs mt-1">Ingresa un email válido.</div>
+      </div>
+
+      <div>
+        <label for="hireDate" class="block text-sm font-medium text-gray-700">Fecha de Contratación</label>
+        <input type="date" id="hireDate" formControlName="hireDate"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('hireDate', 'required')}">
+        <div *ngIf="hasError('hireDate', 'required')" class="text-red-500 text-xs mt-1">La fecha de contratación es requerida.</div>
+      </div>
+
+      <div>
+        <label for="birthDate" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
+        <input type="date" id="birthDate" formControlName="birthDate"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('birthDate', 'required')}">
+        <div *ngIf="hasError('birthDate', 'required')" class="text-red-500 text-xs mt-1">La fecha de nacimiento es requerida.</div>
+      </div>
+
+      <div>
+        <label for="position" class="block text-sm font-medium text-gray-700">Cargo</label>
+        <input type="text" id="position" formControlName="position"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               [ngClass]="{'border-red-500': hasError('position', 'required')}">
+        <div *ngIf="hasError('position', 'required')" class="text-red-500 text-xs mt-1">El cargo es requerido.</div>
+      </div>
+
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700">Estado del Empleo</label>
+        <select id="status" formControlName="status"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-500': hasError('status', 'required')}">
+          <option value="">Selecciona un estado</option>
+          <option value="Activo">Activo</option>
+          <option value="En licencia">En licencia</option>
+          <option value="Terminado">Terminado</option>
+          </select>
+        <div *ngIf="hasError('status', 'required')" class="text-red-500 text-xs mt-1">El estado es requerido.</div>
+      </div>
+
+      <div *ngIf="isEditMode" class="md:col-span-2">
+        <label for="active" class="flex items-center text-sm font-medium text-gray-700 cursor-pointer">
+          <input type="checkbox" id="active" formControlName="active" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="ml-2">Activo</span>
+        </label>
+      </div>
+
+      <div class="md:col-span-2 flex justify-end mt-6">
+        <button type="submit"
+                [disabled]="workerForm.invalid"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded-md shadow-lg transition duration-300 ease-in-out flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          {{ isEditMode ? 'Guardar Cambios' : 'Crear Trabajador' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
